@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weight Loss Progress Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+    }
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .progress-section, .todo-section {
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      background: #c8e6c9;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 25px;
+    }
+    .progress-bar-inner {
+      background: #43a047;
+      height: 100%;
+      width: 0%;
+      color: white;
+      text-align: center;
+      line-height: 25px;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+      padding: 5px 0;
+    }
+    .todo-item input {
+      margin-right: 10px;
+    }
+    button {
+      background: #2e7d32;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1b5e20;
+    }
+  </style>
+</head>
+<body>
+  <header>Weight Loss Progress Tracker</header>
+  <div class="container">
+    <section class="progress-section">
+      <h2>Today's Progress</h2>
+      <div class="progress-bar">
+        <div id="progress-bar-inner" class="progress-bar-inner">0%</div>
+      </div>
+    </section>
+
+    <section class="todo-section">
+      <h2>Today's To-Do List</h2>
+      <div id="todo-list"></div>
+      <button id="add-todo">Add Task</button>
+    </section>
+
+    <button id="mark-done">Mark Day as Done</button>
+  </div>
+
+  <script>
+    const todoList = document.getElementById('todo-list');
+    const progressBar = document.getElementById('progress-bar-inner');
+    const addTodoButton = document.getElementById('add-todo');
+    const markDoneButton = document.getElementById('mark-done');
+
+    let todos = JSON.parse(localStorage.getItem('todos')) || [
+      { text: '20 stair climbs', done: false },
+      { text: 'Drink 2L of water', done: false },
+      { text: 'Avoid junk food', done: false }
+    ];
+
+    function renderTodos() {
+      todoList.innerHTML = '';
+      todos.forEach((todo, index) => {
+        const div = document.createElement('div');
+        div.className = 'todo-item';
+        div.innerHTML = `
+          <label>
+            <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTask(${index})">
+            ${todo.text}
+          </label>
+          <button onclick="deleteTask(${index})">Delete</button>
+        `;
+        todoList.appendChild(div);
+      });
+      updateProgress();
+    }
+
+    function toggleTask(index) {
+      todos[index].done = !todos[index].done;
+      localStorage.setItem('todos', JSON.stringify(todos));
+      updateProgress();
+    }
+
+    function deleteTask(index) {
+      todos.splice(index, 1);
+      localStorage.setItem('todos', JSON.stringify(todos));
+      renderTodos();
+    }
+
+    addTodoButton.addEventListener('click', () => {
+      const newTask = prompt('Enter new task:');
+      if (newTask) {
+        todos.push({ text: newTask, done: false });
+        localStorage.setItem('todos', JSON.stringify(todos));
+        renderTodos();
+      }
+    });
+
+    function updateProgress() {
+      const total = todos.length;
+      const completed = todos.filter(t => t.done).length;
+      const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+      progressBar.style.width = percent + '%';
+      progressBar.textContent = percent + '%';
+    }
+
+    markDoneButton.addEventListener('click', () => {
+      const completed = todos.filter(t => t.done).length;
+      const percent = Math.round((completed / todos.length) * 100);
+      if (percent >= 70) {
+        alert('Day completed successfully!');
+      } else {
+        alert('You need at least 70% of tasks done to mark the day as complete.');
+      }
+    });
+
+    renderTodos();
+  </script>
+</body>
+</html>
